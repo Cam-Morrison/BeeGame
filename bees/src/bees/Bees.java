@@ -131,7 +131,7 @@ public class Bees {
 		
 	}
 
-	public static void gameOver() {
+	public static void gameOver() { //Function to display options once game is complete
 
 		int menuChoice = JOptionPane.showConfirmDialog(null,
 				"You have clicked all the bees away!\n" + "Would you like to play another?", "Congratulations!",
@@ -141,7 +141,7 @@ public class Bees {
 			bees();
 		}
 
-		else {
+		else { //Exit
 			JOptionPane.showMessageDialog(null, "Thank you for playing!", "You have chosen to exit", 1);
 			System.exit(0);
 		}
