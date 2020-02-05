@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import java.awt.Image;
 
-public class Bee {
+public class Bee { 
 
     private JLabel label;
     private boolean dead = false;
@@ -29,7 +29,7 @@ public class Bee {
         label.addMouseListener(new MouseAdapter() { // When Image is clicked
             @Override
             public void mousePressed(MouseEvent e) {
-                dead = true;
+                dead = true; //Stops bee from moving
                 label.removeMouseListener(this); // Removes mouse listener so game wont finish before ALL bees are
                 // clicked
                 icon.setImage(swatImage);
@@ -49,7 +49,7 @@ public class Bee {
         label.setSize(icon.getIconWidth(), icon.getIconHeight());
     }
 
-    public void setLocation(int x, int y) {
+    public void setLocation(int x, int y) { //Moves bees around untill they are clicked
         if (dead == false) {
             label.setLocation(x, y);
         }

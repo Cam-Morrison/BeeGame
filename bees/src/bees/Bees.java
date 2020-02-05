@@ -38,16 +38,16 @@ public class Bees {
         bees.start();
     } //End of main
 
-    private static JFrame mainFrame;
-    private static JLabel scoreLabel;
-    private static Image swat;
+    private static JFrame mainFrame; //Game background
+    private static JLabel scoreLabel; //Displays score top left
+    private static Image swat; //Image when bees are clicked
     private static int numBees = 20; //Change number of bees per game.
     private final int delay = 40; //Change how fast bees. 
     private static int beesClicked = 0; //Initialising number of bees clicked.
-    private static int score = 0;
+    private static int score = 0; //Keeps track of users sucsessful clicks
 
-    public void start() {
-        readScore();
+    public void start() { 
+        readScore(); //Reads previous scores from text file
         mainFrame(); //Creates JFrame
         bees(); //Runs program 
     }
@@ -81,14 +81,14 @@ public class Bees {
 
         mainFrame.setVisible(true);
         mainFrame.repaint();
-
     } //End of function
 
-    public void repaintScore() {
+    
+    public void repaintScore() { //Updates score label
         scoreLabel.setText("Score:" + score);
     }
 
-    public void beeClicked() {
+    public void beeClicked() { //Counts score and calls game menu when all bees are clicked.
         beesClicked++;
         score++;
 
@@ -99,7 +99,7 @@ public class Bees {
         }
     }
 
-    public void clickSound() {
+    public void clickSound() { //Plays a sound when bees are clicked
         try {
             Clip clip = AudioSystem.getClip();
             clip.open(AudioSystem.getAudioInputStream(Bees.class.getResource("pop.wav")));
@@ -151,7 +151,7 @@ public class Bees {
         }
     }
 
-    private static void readScore() {
+    private static void readScore() { //Reads score from text file
         Path path = Paths.get(System.getenv("APPDATA") + "\\score.txt"); //Looking for file
         if (Files.exists(path)) {
             try {
@@ -166,14 +166,16 @@ public class Bees {
         }
     }
 
-    private static void writeScore() {
+    private static void writeScore() { //Writes score to text file
         Path path = Paths.get(System.getenv("APPDATA") + "\\score.txt"); //Looking for file
+        
         if (Files.exists(path)) { //If file exists
+            PrintWriter writer;
             try {
-                try (PrintWriter writer = new PrintWriter("score.txt", "UTF-8")) {
-                    writer.print(score); //Outputs score to score.txt
-                } //Outputs score to score.txt
-
+                writer = new PrintWriter(System.getenv("APPDATA") + "\\score.txt", "UTF-8");{
+                writer.print(score); //Outputs score to score.txt
+                writer.close();
+                }
             } catch (IOException e) {
             }
         }
@@ -184,7 +186,7 @@ public class Bees {
                 PrintWriter writer = new PrintWriter(System.getenv("APPDATA") + "\\score.txt", "UTF-8")) {
                 writer.print(score); //Outputs score to score.txt
                 writer.close();
-                Runtime.getRuntime().exec("attrib +H " + System.getenv("APPDATA") + "\\score.txt");
+                Runtime.getRuntime().exec(System.getenv("APPDATA") + "\\score.txt");
 
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
             } catch (IOException ex) {
