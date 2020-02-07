@@ -1,6 +1,13 @@
 package bees;
 
-import static bees.Bees.setTimeout;
+/* ---------------- Details ------------------
+  * Authors: Cameron Morrison & Ged Robertson
+  * Program: Bee Game
+  * Objective: Click all the bees!
+  * Year created: 2020   	
+  * ------------------------------------------*/
+
+import static bees.Game.setTimeout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -15,11 +22,11 @@ public class Bee {
     private JLabel label;
     private boolean dead = false;
 
-    public Bee(JFrame mainFrame, Image swatImage, Bees bees) {
+    public Bee(JFrame mainFrame, Image swatImage, Game bees) {
         ImageIcon icon;
 
         try {
-            icon = new ImageIcon(ImageIO.read(Bees.class.getResource("bee.png")));
+            icon = new ImageIcon(ImageIO.read(Game.class.getResource("bee.png")));
         } catch (IOException ex) {
             return;
         }
