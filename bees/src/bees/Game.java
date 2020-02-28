@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Random;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
@@ -44,10 +43,9 @@ public class Game {
     private static JFrame mainFrame; //Game background
     private static JLabel scoreLabel; //Displays score top left
     private static Image swat; //Image when bees are clicked
-    private static int numBees = 10; //Change number of bees per game.
-    private final int delay = 60; //Change how fast bees. 
+    private static int numBees = 20; //Change number of bees per game. 
     private static int beesClicked = 0; //Initialising number of bees clicked.
-    private static int score = 0; //Keeps track of users sucsessful clicks
+    private static int score = 0; //Keeps track of users clicks on bees.
 
     public void start() { 
         readScore(); //Reads previous scores from text file
@@ -146,23 +144,22 @@ public class Game {
         Bee[] bees = new Bee[numBees];
 
         for (int i = 0; i < numBees; i++) { // For number of Bees
-            bees[i] = new Bee(mainFrame, swat, this);
+            bees[i] = new Bee(mainFrame, swat, this, numGenerator, width, height);
         }
-
+        long lastTime = 0;
+        long timeNow;
         while (true) {
-            try {
-                for (int i = 0; i < numBees; i++) {
-                    if (i % 10 == 0) { // If Bees can be divided by 10
-                        int step = i + 10;
-                        for (int move = i; move < step; move++) { // Moves the Bees around in groups of 10
-                            bees[move].setLocation(numGenerator.nextInt((width - 210) + 1),
-                                    numGenerator.nextInt((height - 150) + 1));
-                        } // Stops bees from going over the edges ^^
-                    }
-                    TimeUnit.MILLISECONDS.sleep(delay); // Delay is changeable at top of document
-                }
-            } catch (InterruptedException e) {
-            }
+        	timeNow = System.currentTimeMillis();
+        	if (timeNow > lastTime) {
+                tick(bees, numBees); //Add more to change speed
+                lastTime = timeNow;
+        	}
+        }
+    }
+    
+    private void tick(Bee[] bees, int numBees) {
+        for (int i = 0; i < numBees; i++) {
+    		bees[i].tick();
         }
     }
 

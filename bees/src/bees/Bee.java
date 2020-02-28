@@ -11,6 +11,8 @@ import static bees.Game.setTimeout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.Random;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -21,8 +23,28 @@ public class Bee {
 
     private JLabel label;
     private boolean dead = false;
+    
+    private int currentX;
+    private int currentY;
+    
+    private int goingX = 0;
+    private int goingY = 0;
+    
+    private int frameWidth;
+    private int frameHeight;
+    
+    private Random numGenerator;
 
-    public Bee(JFrame mainFrame, Image swatImage, Game bees) {
+    public Bee(JFrame mainFrame, Image swatImage, Game bees, Random numGenerator, int frameWidth, int frameHeight) {
+    	this.numGenerator = numGenerator;
+    	this.frameHeight = frameHeight;
+    	this.frameWidth = frameWidth;
+    	
+        currentX = numGenerator.nextInt((frameWidth - 210) + 1);
+        currentY = numGenerator.nextInt((frameHeight - 150) + 1);
+        goingX = numGenerator.nextInt((frameWidth - 210) + 1);
+        goingY = numGenerator.nextInt((frameHeight - 150) + 1);
+    	
         ImageIcon icon;
 
         try {
@@ -54,12 +76,30 @@ public class Bee {
 
         mainFrame.add(label);
         label.setSize(icon.getIconWidth(), icon.getIconHeight());
-    }
+    } //End Function Bee
+    
+    
+    public void tick() { //Function to smoothly move Bees
+    	if (dead == false) {
+    		if (currentX == goingX && currentY == goingY) {
+                goingX = numGenerator.nextInt((frameWidth - 210) + 1);
+                goingY = numGenerator.nextInt((frameHeight - 150) + 1);
+    		}
+    		
+    		if (currentX > goingX) {
+    			currentX--;
+    		} else if (currentX < goingX) {
+    			currentX++;
+    		}
+    		
+    		if (currentY > goingY) {
+    			currentY--;
+    		} else if (currentY < goingY) {
+    			currentY++;
+    		}
+    		
+    		label.setLocation(currentX, currentY);
+    	}
+    } //End Function tick
 
-    public void setLocation(int x, int y) { //Moves bees around untill they are clicked
-        if (dead == false) {
-            label.setLocation(x, y);
-        }
-    }
-
-}
+} //End Class Bee
