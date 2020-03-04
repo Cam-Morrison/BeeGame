@@ -154,11 +154,20 @@ public class Game {
         
         String[] dropDownMenu = {"10", "20", "30", "40", "50"};
         String option = (String)JOptionPane.showInputDialog(null, "Please enter the number of bees you would like", "Number of Bees", JOptionPane.PLAIN_MESSAGE, null, dropDownMenu, dropDownMenu[1]);
+        if(option == null){
+            System.out.println("failed");
+            option = "20";
+        }
         int newNumBees = Integer.parseInt(option);
         
         String[] dropDownMenu2 = {"Easy", "Normal", "Hard"};
         option = (String)JOptionPane.showInputDialog(null, "Please enter the difficulty of bees you would like", "Difficulty", JOptionPane.PLAIN_MESSAGE, null, dropDownMenu2, dropDownMenu2[1]);
-        
+       
+        if(option == null){
+            System.out.println("failed");
+            option = "Normal";
+        }
+                
         this.difficulty = option;
         switch(option) {
         case "Easy":
