@@ -83,12 +83,15 @@ public class Game {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize(); // Gets Devices resolution
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setSize(screenSize);
-
+        mainFrame.setUndecorated(true);
+        
         width = mainFrame.getWidth();
         height = mainFrame.getHeight();
-
-        mainFrame.setUndecorated(true);
-        mainFrame.getContentPane().setBackground(Color.GRAY);
+        
+        //Background Image for the game
+        try{ mainFrame.setContentPane(new JLabel(new ImageIcon(ImageIO.read(getClass().getResource("background.png")))));
+        }catch(IOException e){
+           e.printStackTrace();}
 
         //Score Label
         scoreLabel = new JLabel("Bees Saved: " + score);
@@ -122,7 +125,7 @@ public class Game {
             }
         });
 
-        ImageIcon icon;
+        ImageIcon icon = null;
         try {
             icon = new ImageIcon(ImageIO.read(Game.class.getResource("plate.png")));
         } catch (IOException ex) {
@@ -218,8 +221,8 @@ public class Game {
         numBeeBtn.setBackground(Color.DARK_GRAY);
         numBeeBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String[] dropDownMenu = {"10", "20", "30", "40", "50"};
-                String option = (String) JOptionPane.showInputDialog(null, "Please enter the number of bees you would like", "Number of Bees", JOptionPane.PLAIN_MESSAGE, null, dropDownMenu, dropDownMenu[1]);
+                String[] dropDownMenu = {"10", "20", "30"};
+                String option = (String) JOptionPane.showInputDialog(null, "Please enter the number of bees you would like", "Number of Bees", JOptionPane.PLAIN_MESSAGE, null, dropDownMenu, newNumBees);
                 if (option == null) {
                     System.out.println("failed");
                     option = "20";
@@ -235,14 +238,12 @@ public class Game {
         difficultyBtn.setBackground(Color.DARK_GRAY);
         difficultyBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String[] dropDownMenu2 = {"Easy", "Normal", "Hard"};
-                String option = (String) JOptionPane.showInputDialog(null, "Please enter the difficulty of bees you would like", "Difficulty", JOptionPane.PLAIN_MESSAGE, null, dropDownMenu2, dropDownMenu2[1]);
-                if (option == null) { //If there is no input then set to default value
-                    System.out.println("failed");
-                    option = "Normal";
+                String optionsList[] = {"Easy", "Normal", "Hard"};
+                difficulty = (String) JOptionPane.showInputDialog(null, "Please enter the difficulty of bees you would like", "Difficulty", JOptionPane.PLAIN_MESSAGE, null, optionsList, difficulty);
+                if (difficulty == null) { //If there is no input then set to default value
+                    difficulty = "Normal";
                 }
-                difficulty = option;
-                switch (option) {
+                switch (difficulty) {
                     case "Easy":
                         delay = 7;
                         break;
@@ -277,7 +278,7 @@ public class Game {
         closeBtn.setBackground(Color.red);
         closeBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                writeScore();
+                writeScore();  
                 exitMessage();
                 System.exit(0);
             }
@@ -361,29 +362,34 @@ public class Game {
             System.out.println(e);
         }
 
+        swatImage = null;
         try {
             ImageIcon swatIcon = new ImageIcon(ImageIO.read(Game.class.getResource("click.png")));
             swatImage = swatIcon.getImage();
         } catch (IOException e1) {
             System.out.println(e1);
-        } // Image when bee is clicked
-
+        } // Image that is displayed when bee is clicked
+        swatImage = swatImage.getScaledInstance((width/100)*10, (height/100*10), Image.SCALE_DEFAULT); //Smart scaling for swat image
+        
+        beeImage = null;
         try {
             ImageIcon beeIcon = new ImageIcon(ImageIO.read(Game.class.getResource("bee.png")));
             beeImage = beeIcon.getImage();
         } catch (IOException e1) {
             System.out.println(e1);
-        } // Image when bee is clicked
-
+        } //Image for bee
+        beeImage = beeImage.getScaledInstance((width/100)*10, (height/100*10), Image.SCALE_DEFAULT); //Smart scaling for Bee image
+                
+        beeFlippedImage = null;
         try {
             ImageIcon beeFlippedIcon = new ImageIcon(ImageIO.read(Game.class.getResource("beeFlip.png")));
             beeFlippedImage = beeFlippedIcon.getImage();
         } catch (IOException e1) {
             System.out.println(e1);
-        } // Image when bee is clicked
-
+        } //Image for bee facing opposite direction
+        beeFlippedImage = beeFlippedImage.getScaledInstance((width/100)*10, (height/100*10), Image.SCALE_DEFAULT); //Smart scaling for Flipped Bee image
+        
         numGenerator = new Random(); // Random number
-
         this.setBees(20);
         this.runGame();
     }

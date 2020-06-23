@@ -63,7 +63,7 @@ public class Bee {
         icon = new ImageIcon(beeImage);
 
         label = new JLabel(icon);
-
+        
         label.addMouseListener(new MouseAdapter() { // When Image is clicked
             @Override
             public void mousePressed(MouseEvent e) {
@@ -156,6 +156,7 @@ public class Bee {
             }
 
             label.setLocation(currentX, currentY);
+            
         }
     } //End Function tick
 } //End Class Bee
