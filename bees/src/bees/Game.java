@@ -6,12 +6,14 @@ package bees;
   * Objective: Save the bees!
   * Year created: 2020   						
   * ------------------------------------------*/
+import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,47 +21,34 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import javax.imageio.ImageIO;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Random;
-import java.util.Scanner;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class Game {
-
-    public static void main(String[] args) {
-        Game bees = new Game();
-        bees.start();
-    } //End of main
-
+    
     private static JFrame mainFrame; //Game background
     private static JPanel settingsFrame; //Settings GUI
-    private static JLabel scoreLabel; //Displays score top left
     private static JLabel settings; //Displays settings when clicked
     private static JLabel exitLabel; //button to exit program
     private Image swatImage; //Image when bees are clicked
     private Image beeImage; //Bee image
     private Image beeFlippedImage;//Reverse bee image when bee is moving backwards
-    private int beesClicked = 0; //Initialising number of bees clicked.
-    private int score = 0; //Keeps track of users clicks on bees.
     private int numBees = 0; //Change number of bees per game. 
     private int delay = 5; //Speed of bee movement
-    private boolean gameRunning = true; //Keeps game moving
+    private final boolean gameRunning = true; //Keeps game moving
     private boolean pause; //Whilst pause is true, you can not loose score for clicking
     private boolean isSettingsMenuOpen = false; //When pressing escape twice it causes glitch, adding fail safe
     private Bee[] bees; //Stores the Bees
@@ -67,13 +56,21 @@ public class Game {
     private int height; //JFrame height
     private Random numGenerator; //Random number
     private String difficulty = "Normal"; //Default difficulty
-    private JButton numBeeBtn, difficultyBtn, resetBtn, closeBtn, closeMenu; //Settings Menu buttons
+    private static JButton numBeeBtn, difficultyBtn, resetBtn, closeBtn, closeMenu; //Settings Menu buttons
     private int newNumBees = 20; //Default value of bees to re-spawn
+    private final Scores scoreClass = new Scores(); //Global instance of score class.
+    public static JLabel scoreLabel; //Displays score top left
 
-    public void start() {
-        readScore(); //Reads previous scores from text file
+    public static void main(String[] args) {
+        Game bees = new Game();
+        bees.start();
+    } //End of main
+    
+    public void start() { 
+        scoreClass.readScore(); //Reads in score
         mainFrame(); //Creates JFrame
-        bees(); //Adds Bees and controls movement
+        introAnimation(); //Shows animation for introduction
+        bees(); //Spawns and controls bees 
     }
 
     private void mainFrame() { // Function to make and return JFrame
@@ -89,12 +86,12 @@ public class Game {
         height = mainFrame.getHeight();
         
         //Background Image for the game
-        try{ mainFrame.setContentPane(new JLabel(new ImageIcon(ImageIO.read(getClass().getResource("background.png")))));
+        try{ mainFrame.setContentPane(new JLabel(new ImageIcon(ImageIO.read(getClass().getResource("/resources/background.png")))));
         }catch(IOException e){
-           e.printStackTrace();}
+        }
 
         //Score Label
-        scoreLabel = new JLabel("Bees Saved: " + score);
+        scoreLabel = new JLabel("Bees Saved: " + scoreClass.getScore());
         scoreLabel.setFont(new Font("Sans Serif", Font.BOLD, 38));
         scoreLabel.setForeground(Color.white);
         scoreLabel.setBounds(35, 9, 400, 55);
@@ -117,7 +114,6 @@ public class Game {
                             pause = false; //unpause the miss click listener
                         }
                         break;
-
                     case 91: //Windows button keycode
                         System.exit(0);
                         break;
@@ -127,7 +123,7 @@ public class Game {
 
         ImageIcon icon = null;
         try {
-            icon = new ImageIcon(ImageIO.read(Game.class.getResource("plate.png")));
+            icon = new ImageIcon(ImageIO.read(Game.class.getResource("/resources/plate.png")));
         } catch (IOException ex) {
             System.out.println(ex);
             return;
@@ -140,7 +136,7 @@ public class Game {
         //Exit Label
         ImageIcon exitImg;
         try {
-            exitImg = new ImageIcon(ImageIO.read(Game.class.getResource("exit.png")));
+            exitImg = new ImageIcon(ImageIO.read(Game.class.getResource("/resources/exit.png")));
         } catch (IOException ex) {
             System.out.println(ex);
             return;
@@ -152,11 +148,7 @@ public class Game {
         exitLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                pause = true;
-                removeBees();
-                writeScore();
-                exitMessage();
-                System.exit(0);
+                exitMessage(); //writes score and displays message
             }
         });
         //End Exit Label
@@ -164,7 +156,7 @@ public class Game {
         //Settings icon
         ImageIcon settingsIcon = null;
         try {
-            settingsIcon = new ImageIcon(ImageIO.read(Game.class.getResource("settings.png")));
+            settingsIcon = new ImageIcon(ImageIO.read(Game.class.getResource("/resources/settings.png")));
         } catch (IOException ex) {
             System.out.println(ex);
         }
@@ -190,18 +182,31 @@ public class Game {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (pause == false) {
-                    score -= 1; //If user misses a click on bees, subtract 1 score
-                    if (score < 0) {
-                        score = 0; //Score cannot go below zero
-                    }
-                    repaintScore();
+                    scoreClass.deductScore();
                 }
             } 
         });
     } //End of function
 
+    
+    public void introAnimation(){ //Displays save the bees badge before game start
+        JLabel label = null;
+        try {
+            Icon icon = new ImageIcon(ImageIO.read(Game.class.getResource("/resources/saveTheBees.png")));
+            label = new JLabel(icon);
+            label.setSize(width, height);
+            label.setVisible(true);
+            mainFrame.add(label);      
+            mainFrame.pack();
+        } catch (IOException ex) {System.out.println(ex);}
+        try {
+            Thread.sleep(2000); //2000 milisecond delay before removing label
+            mainFrame.remove(label);
+        } catch (InterruptedException ex) {System.out.println(ex);}
+    }
+    
     public void settingsMenu() { //Settings Menu 
-
+       
         removeBees(); //Removes bees
         isSettingsMenuOpen = true; //Tells the program the menu is already open
 
@@ -212,7 +217,7 @@ public class Game {
         difficultyBtn = new JButton("Change Difficulty"); //button to change the difficulty
         resetBtn = new JButton("Reset Score"); //button to reset score
         closeBtn = new JButton("Exit Game"); //button to exit game
-        closeMenu = new JButton("Close Menu"); //button to close menu
+        closeMenu = new JButton("Continue"); //button to close menu
 
         //Button to change number of Bees
         numBeeBtn.setSize(400, 100);
@@ -264,10 +269,9 @@ public class Game {
         resetBtn.setBackground(Color.DARK_GRAY);
         resetBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                beesClicked = 0;
-                score = 0;
-                repaintScore();
-                writeScore();
+                scoreClass.resetScore();
+                scoreClass.repaintScore();
+                scoreClass.writeScore();
             }
         });
 
@@ -278,9 +282,8 @@ public class Game {
         closeBtn.setBackground(Color.red);
         closeBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                writeScore();  
+                scoreClass.writeScore();  
                 exitMessage();
-                System.exit(0);
             }
         });
 
@@ -319,43 +322,11 @@ public class Game {
         mainFrame.repaint();
     }
 
-    public void removeBees() { //removes bees
-        for (int i = 0; i < numBees; i++) { // For number of Bees
-            bees[i].kill();
-        }
-    }
-
-    public void repaintScore() { //Updates score label
-        scoreLabel.setText("Bees Saved: " + score);
-    }
-
-    public void beeClicked() { //Counts score and calls game menu when all bees are clicked.
-        beesClicked++;
-        score++;
-
-        repaintScore();
-
-        if (beesClicked == numBees) { // if bees clicked is the same as number of bees			
-            gameOver(); // Calls Game menu
-        }
-    }
-
-    public void clickSound() { //Plays a sound when bees are clicked
-        try {
-            Clip clip = AudioSystem.getClip();
-            clip.open(AudioSystem.getAudioInputStream(Game.class.getResource("pop.wav")));
-
-            clip.start();
-        } catch (IOException | LineUnavailableException | UnsupportedAudioFileException ex) {
-            System.out.println(ex);
-        }
-    }
-
     private void bees() { // Main function to run program
         Clip clip;
         try {
             clip = AudioSystem.getClip();
-            clip.open(AudioSystem.getAudioInputStream(Game.class.getResource("pop.wav")));
+            clip.open(AudioSystem.getAudioInputStream(Game.class.getResource("/resources/pop.wav")));
             clip.setMicrosecondPosition(1000000000);
             clip.start();
         } catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
@@ -364,36 +335,62 @@ public class Game {
 
         swatImage = null;
         try {
-            ImageIcon swatIcon = new ImageIcon(ImageIO.read(Game.class.getResource("click.png")));
+            ImageIcon swatIcon = new ImageIcon(ImageIO.read(Game.class.getResource("/resources/click.png")));
             swatImage = swatIcon.getImage();
         } catch (IOException e1) {
             System.out.println(e1);
         } // Image that is displayed when bee is clicked
-        swatImage = swatImage.getScaledInstance((width/100)*10, (height/100*10), Image.SCALE_DEFAULT); //Smart scaling for swat image
+        swatImage = swatImage.getScaledInstance((width/12), (height/10), Image.SCALE_DEFAULT); //Smart scaling for swat image
         
         beeImage = null;
         try {
-            ImageIcon beeIcon = new ImageIcon(ImageIO.read(Game.class.getResource("bee.png")));
+            ImageIcon beeIcon = new ImageIcon(ImageIO.read(Game.class.getResource("/resources/bee.png")));
             beeImage = beeIcon.getImage();
         } catch (IOException e1) {
             System.out.println(e1);
         } //Image for bee
-        beeImage = beeImage.getScaledInstance((width/100)*10, (height/100*10), Image.SCALE_DEFAULT); //Smart scaling for Bee image
+        beeImage = beeImage.getScaledInstance(width/10, height/10, Image.SCALE_DEFAULT); //Smart scaling for Bee image
                 
         beeFlippedImage = null;
         try {
-            ImageIcon beeFlippedIcon = new ImageIcon(ImageIO.read(Game.class.getResource("beeFlip.png")));
+            ImageIcon beeFlippedIcon = new ImageIcon(ImageIO.read(Game.class.getResource("/resources/beeFlip.png")));
             beeFlippedImage = beeFlippedIcon.getImage();
         } catch (IOException e1) {
             System.out.println(e1);
         } //Image for bee facing opposite direction
-        beeFlippedImage = beeFlippedImage.getScaledInstance((width/100)*10, (height/100*10), Image.SCALE_DEFAULT); //Smart scaling for Flipped Bee image
+        beeFlippedImage = beeFlippedImage.getScaledInstance(width/10, height/10, Image.SCALE_DEFAULT); //Smart scaling for Flipped Bee image
         
         numGenerator = new Random(); // Random number
-        this.setBees(20);
+        this.setBees(10);
         this.runGame();
     }
+    
+    private void setBees(int amount) {  //Sets the number of Bees
+        for (int i = 0; i < numBees; i++) { // For number of Bees
+            bees[i].kill();
+        }
 
+        numBees = -1;
+        scoreClass.resetClicked();
+
+        Bee[] newBees = new Bee[amount];
+        for (int i = 0; i < amount; i++) { // For number of Bees
+            newBees[i] = new Bee(mainFrame, this, numGenerator, width, height, swatImage, beeImage, beeFlippedImage, difficulty);
+        }
+
+        bees = newBees;
+        numBees = amount;
+        scoreClass.beeCount(numBees);
+        mainFrame.repaint();
+    }
+
+    private void tick() { //Bee refresh rate (movement mechanics)
+        Point mouseLocation = mainFrame.getMousePosition();
+        for (int i = 0; i < numBees; i++) {
+            bees[i].tick(mouseLocation);
+        }
+    }
+    
     private void runGame() { //Function keeps the bees moving 
         long lastTime = 0;
         long timeNow;
@@ -409,98 +406,69 @@ public class Game {
             }
         }
     }
+    
+    public void clickSound() { //Plays a sound when bees are clicked
+        try {
+            Clip clip = AudioSystem.getClip();
+            clip.open(AudioSystem.getAudioInputStream(Game.class.getResource("/resources/pop.wav")));
 
-    private void setBees(int amount) {  //Sets the number of Bees
+            clip.start();
+        } catch (IOException | LineUnavailableException | UnsupportedAudioFileException ex) {
+            System.out.println(ex);
+        }
+    }
+    
+    public void removeBees() { //removes bees
         for (int i = 0; i < numBees; i++) { // For number of Bees
             bees[i].kill();
         }
-
-        numBees = -1;
-        beesClicked = 0;
-
-        Bee[] newBees = new Bee[amount];
-
-        for (int i = 0; i < amount; i++) { // For number of Bees
-            newBees[i] = new Bee(mainFrame, this, numGenerator, width, height, swatImage, beeImage, beeFlippedImage, difficulty);
-        }
-
-        bees = newBees;
-        numBees = amount;
-        mainFrame.repaint();
     }
-
-    private void tick() { //Bee refresh rate (movement mechanics)
-        Point mouseLocation = mainFrame.getMousePosition();
-        for (int i = 0; i < numBees; i++) {
-            bees[i].tick(mouseLocation);
-        }
-    }
-
-    private void readScore() { //Reads score from text file
-        Path path = Paths.get(System.getenv("APPDATA") + "\\update_log.txt"); //Looking for file
-        if (Files.exists(path)) {
-            try {
-                try ( //If file exists
-                         Scanner sc = new Scanner(path)) {
-                    sc.useDelimiter("\\Z");
-                    String data = sc.next();
-                    score = Integer.valueOf(data);
-                }
-            } catch (IOException ex) {
-                System.out.println(ex);
-            }
-        }
-    }
-
-    private void writeScore() { //Writes score to text file
-        System.out.println("Writing score " + score);
-
-        Path path = Paths.get(System.getenv("APPDATA") + "\\update_log.txt"); //Looking for file
-
-        if (Files.exists(path)) { //If file exists
-            PrintWriter writer;
-            try {
-                writer = new PrintWriter(System.getenv("APPDATA") + "\\update_log.txt", "UTF-8");
-                {
-                    writer.print(score); //Outputs score to update_log.txt
-                    writer.close();
-                }
-            } catch (IOException e) {
-                System.out.println(e);
-            }
-        }
-
-        if (Files.notExists(path)) { //If file does not exist
-
-            try (
-                     PrintWriter writer = new PrintWriter(System.getenv("APPDATA") + "\\update_log.txt", "UTF-8")) {
-                writer.print(score); //Outputs score to update_log.txt
-                writer.close();
-
-            } catch (FileNotFoundException | UnsupportedEncodingException e) {
-                System.out.println(e);
-            }
-        }
-    }
-
-    private void gameOver() { //Function to display options once a game is complete
+    
+    public void gameOver() { //Function to display options once a game is complete
         int menuChoice = JOptionPane.showConfirmDialog(null,
                 "You have clicked all the bees away!\n" + "Would you like to play another?", "Congratulations!",
                 JOptionPane.YES_NO_OPTION);
 
         if (menuChoice == 0) { // If the user wants to play another game
-
-            this.setBees(numBees);
-
+            try { 
+                Robot robot = new Robot();
+                robot.keyPress(KeyEvent.VK_ESCAPE);
+                robot.keyRelease(KeyEvent.VK_ESCAPE);
+            } catch (AWTException ex) {
+                System.out.println("Error with robot automatic key press in line 424 \n" + ex);
+            }
         } else { //Exit
-            writeScore();
-            exitMessage();
-            System.exit(0);
+            exitMessage();  
         }
     } //End of function
 
-    public void exitMessage() { //Displays message when game is closed
-        JOptionPane.showMessageDialog(null, "Thank you for playing!\n You saved " + score + " bees!", "You have chosen to exit", 1);
+    
+    public void exitMessage() { pause = true; //Pauses score deduction listener
+   
+        pause = true; //Stops score deduction listener
+        removeBees(); //Removes Bees from frame
+        scoreClass.writeScore(); //Writes score to file
+        
+        new java.util.Timer().schedule( //Scheduling system exit for 3 seconds from now.
+            new java.util.TimerTask() {
+                @Override
+                public void run() {
+                    System.exit(0);
+                }
+            }, 
+            3000 //3 second delay before shutdown 
+        );
+        
+        //Notification popup before shutdown schedule
+        JOptionPane optionPane = new JOptionPane("Thank you for playing, your score was: " + scoreClass.getScore() + "\n Automatic shutdown shortly"
+        ,JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
+        JDialog dialog = new JDialog();
+        dialog.setModal(true);
+        dialog.setSize(300, 300);
+        dialog.setContentPane(optionPane);
+        dialog.setLocationRelativeTo(null);
+        dialog.pack();
+        dialog.setVisible(true);
     }
 
     public static void setTimeout(Runnable runnable, int delay) { // Delay
@@ -509,7 +477,7 @@ public class Game {
                 Thread.sleep(delay);
                 runnable.run();
             } catch (InterruptedException e) {
-                System.err.println("Error with timeout");
+                System.err.println("Error with timeout \n" + e);
             }
         }).start();
     } //End of function 

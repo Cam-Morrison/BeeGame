@@ -10,7 +10,6 @@ import static bees.Game.setTimeout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Random;
-
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,28 +20,22 @@ public class Bee {
 
     private JLabel label;
     private boolean dead = false;
-
     private int currentX;
     private int currentY;
-
     private int goingX = 0;
     private int goingY = 0;
-
-    ImageIcon icon;
     private final Image swatImage; //Image when bees are clicked
     private final Image beeImage;
     private final Image beeFlippedImage;
-
     private int currentIcon = 1;
-
     private final int frameWidth;
     private final int frameHeight;
-
     private final Random numGenerator;
     private final JFrame mainFrame;
-
     private final String difficulty;
-
+    private Scores score = new Scores();
+    ImageIcon icon;
+    
     public Bee(JFrame mainFrame, Game bees, Random numGenerator, int frameWidth, int frameHeight, Image swatImage, Image beeImage, Image beeFlippedImage, String difficulty) {
         this.numGenerator = numGenerator;
         this.frameHeight = frameHeight;
@@ -62,32 +55,29 @@ public class Bee {
 
         icon = new ImageIcon(beeImage);
 
-        label = new JLabel(icon);
-        
+        label = new JLabel(icon);   
         label.addMouseListener(new MouseAdapter() { // When Image is clicked
             @Override
             public void mousePressed(MouseEvent e) {
                 dead = true; //Stops bee from moving
                 label.removeMouseListener(this); // Removes mouse listener so game wont finish before ALL bees are
-                // clicked
-                setIcon(0);
-                // Change Image to effect
+                setIcon(0);// Change Image to effect
                 bees.clickSound(); //Plays noise
-
+                score.beeClicked(); // Add to counter
+                
                 setTimeout(() -> {
                     mainFrame.remove(label); // remove bee
                     mainFrame.revalidate();
-                    mainFrame.repaint();
-                    bees.beeClicked(); // Add to counter
-                }, 100); // Set effect image invisible after 100Ms
+                    mainFrame.repaint();                
+                }, 200); // Click animation duration
             }
         });
-
         mainFrame.add(label);
         label.setVisible(true);
         label.setSize(icon.getIconWidth(), icon.getIconHeight());
     } //End Function Bee
 
+    
     private void setIcon(int iconNumber) {
         if (iconNumber != currentIcon) {
             currentIcon = iconNumber;
@@ -159,4 +149,5 @@ public class Bee {
             
         }
     } //End Function tick
+    
 } //End Class Bee
