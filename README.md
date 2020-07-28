@@ -1,5 +1,6 @@
 # BeeGame
-The objective of this game is to click away all the bees!
+The objective of this game is to save all the bees!
+This game has an enviromentally friendly motive to insure any influence on younger audiences is indubitably beneficial.
 
 This game was developed entirely in Java and it contains 2D movement physics and a various range of difficulties.
 Difficulties affect the acceleration of bees as well as the general movement speed. 
