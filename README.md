@@ -10,5 +10,5 @@ The bees next random location will be away from the mouse also, it will cancel c
 This game contains a scoring system. When you miss a click and hit the background rather than the bee, you will loose a point. When you click a bee you will gain a point. Simple!
 This game saves your score to %appdata% and you can reset your score in the settings menu.
 
-This game was developed by Cameron Morrison and Ged Robertson in year 1 of Bsc Software development and cyber security as a personal project.
+This game was developed by Cameron Morrison and assisted by Ged Robertson in year 1 of Bsc Software development and cyber security as a personal learning project.
 
