@@ -48,8 +48,8 @@ public class Scores {
         score = score + 1;
         repaintScore();
         
-        if (beesClicked == numberOfBees) { // if bees clicked is the same as number of bees	
-            Game game = new Game();
+        if (beesClicked == numberOfBees) {  // if bees clicked is the same as number of bees
+            Game game = new Game(); //Creating instance of Game class
             game.gameOver(); // Calls Game menu
         } 
     }

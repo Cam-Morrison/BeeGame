@@ -340,7 +340,7 @@ public class Game {
         } catch (IOException e1) {
             System.out.println(e1);
         } // Image that is displayed when bee is clicked
-        swatImage = swatImage.getScaledInstance((width/12), (height/10), Image.SCALE_DEFAULT); //Smart scaling for swat image
+        swatImage = swatImage.getScaledInstance((width/15), (height/10), Image.SCALE_DEFAULT); //Smart scaling for swat image
         
         beeImage = null;
         try {
@@ -425,6 +425,8 @@ public class Game {
     }
     
     public void gameOver() { //Function to display options once a game is complete
+        
+        pause = true;
         int menuChoice = JOptionPane.showConfirmDialog(null,
                 "You have clicked all the bees away!\n" + "Would you like to play another?", "Congratulations!",
                 JOptionPane.YES_NO_OPTION);
@@ -460,7 +462,7 @@ public class Game {
         );
         
         //Notification popup before shutdown schedule
-        JOptionPane optionPane = new JOptionPane("Thank you for playing, your score was: " + scoreClass.getScore() + "\n Automatic shutdown shortly"
+        JOptionPane optionPane = new JOptionPane("Thank you for playing, your score is: " + scoreClass.getScore() + "\n Automatic shutdown shortly"
         ,JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
         JDialog dialog = new JDialog();
         dialog.setModal(true);
