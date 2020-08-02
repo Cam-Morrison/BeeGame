@@ -35,7 +35,7 @@ public class Bee {
     private final String difficulty;
     private Scores score = new Scores();
     ImageIcon icon;
-    
+  
     public Bee(JFrame mainFrame, Game bees, Random numGenerator, int frameWidth, int frameHeight, Image swatImage, Image beeImage, Image beeFlippedImage, String difficulty) {
         this.numGenerator = numGenerator;
         this.frameHeight = frameHeight;
@@ -63,13 +63,15 @@ public class Bee {
                 label.removeMouseListener(this); // Removes mouse listener so game wont finish before ALL bees are
                 setIcon(0);// Change Image to effect
                 bees.clickSound(); //Plays noise
-                score.beeClicked(); // Add to counter
                 
                 setTimeout(() -> {
-                    mainFrame.remove(label); // remove bee
+                    mainFrame.remove(label);
                     mainFrame.revalidate();
-                    mainFrame.repaint();                
+                    mainFrame.repaint();             
                 }, 200); // Click animation duration
+                
+                score.beeClicked(); // Add to counter 
+                //beesClicked() added after click animation to stop final bee image transition from freezing when gameOver() is called.
             }
         });
         mainFrame.add(label);
@@ -77,7 +79,7 @@ public class Bee {
         label.setSize(icon.getIconWidth(), icon.getIconHeight());
     } //End Function Bee
 
-    
+
     private void setIcon(int iconNumber) {
         if (iconNumber != currentIcon) {
             currentIcon = iconNumber;
@@ -99,6 +101,8 @@ public class Bee {
     public void kill() {
         dead = true;
         mainFrame.remove(label);
+        mainFrame.revalidate();
+        mainFrame.repaint();
     }
 
     public void tick(Point mouseLocation) { //Function to smoothly move Bees

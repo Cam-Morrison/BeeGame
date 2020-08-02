@@ -427,21 +427,27 @@ public class Game {
     public void gameOver() { //Function to display options once a game is complete
         
         pause = true;
-        int menuChoice = JOptionPane.showConfirmDialog(null,
-                "You have clicked all the bees away!\n" + "Would you like to play another?", "Congratulations!",
-                JOptionPane.YES_NO_OPTION);
+        removeBees();
+        
+        if(bees == null){ //If no bees left:
+            int menuChoice = JOptionPane.showConfirmDialog(null,
+                    "You have clicked all the bees away!\n" + "Would you like to play another?", "Congratulations!",
+                    JOptionPane.YES_NO_OPTION);
 
-        if (menuChoice == 0) { // If the user wants to play another game
-            try { 
-                Robot robot = new Robot();
-                robot.keyPress(KeyEvent.VK_ESCAPE);
-                robot.keyRelease(KeyEvent.VK_ESCAPE);
-            } catch (AWTException ex) {
-                System.out.println("Error with robot automatic key press in line 424 \n" + ex);
-            }
-        } else { //Exit
-            exitMessage();  
+            if (menuChoice == 0) { // If the user wants to play another game
+                try { 
+                    Robot robot = new Robot(); 
+                    robot.keyPress(KeyEvent.VK_ESCAPE); //Program presses escape to call settings menu rather than creating a new menu
+                    robot.keyRelease(KeyEvent.VK_ESCAPE);
+                } catch (AWTException ex) {
+                    System.out.println("Error with robot automatic key press in line 424 \n" + ex);
+                }
+            } else { //Exit
+                exitMessage();  
+            }     
         }
+        
+
     } //End of function
 
     
