@@ -46,7 +46,7 @@ public class Game {
     private Image swatImage; //Image when bees are clicked
     private Image beeImage; //Bee image
     private Image beeFlippedImage;//Reverse bee image when bee is moving backwards
-    private int numBees = 0; //Change number of bees per game. 
+    private int numBees = 0; //Change number of bees per game
     private int delay = 5; //Speed of bee movement
     private final boolean gameRunning = true; //Keeps game moving
     private boolean pause; //Whilst pause is true, you can not loose score for clicking
@@ -58,9 +58,9 @@ public class Game {
     private String difficulty = "Normal"; //Default difficulty
     private static JButton numBeeBtn, difficultyBtn, resetBtn, closeBtn, closeMenu; //Settings Menu buttons
     private int newNumBees = 20; //Default value of bees to re-spawn
-    private final Scores scoreClass = new Scores(); //Global instance of score class.
+    private final Scores scoreClass = new Scores(); //Global instance of score class
     public static JLabel scoreLabel; //Displays score top left
-    private Clip clip;
+    private Clip clip; //Audio file that is played when bee is clicked
 
     public static void main(String[] args) {
         Game bees = new Game();
