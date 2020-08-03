@@ -60,6 +60,7 @@ public class Game {
     private int newNumBees = 20; //Default value of bees to re-spawn
     private final Scores scoreClass = new Scores(); //Global instance of score class.
     public static JLabel scoreLabel; //Displays score top left
+    private Clip clip;
 
     public static void main(String[] args) {
         Game bees = new Game();
@@ -323,7 +324,6 @@ public class Game {
     }
 
     private void bees() { // Main function to run program
-        Clip clip;
         try {
             clip = AudioSystem.getClip();
             clip.open(AudioSystem.getAudioInputStream(Game.class.getResource("/resources/pop.wav")));
@@ -408,14 +408,9 @@ public class Game {
     }
     
     public void clickSound() { //Plays a sound when bees are clicked
-        try {
-            Clip clip = AudioSystem.getClip();
-            clip.open(AudioSystem.getAudioInputStream(Game.class.getResource("/resources/pop.wav")));
-
-            clip.start();
-        } catch (IOException | LineUnavailableException | UnsupportedAudioFileException ex) {
-            System.out.println(ex);
-        }
+        clip.stop(); 
+        clip.setFramePosition(0); //Resetting clip position
+        clip.start(); 
     }
     
     public void removeBees() { //removes bees
