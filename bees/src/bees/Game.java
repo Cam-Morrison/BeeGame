@@ -153,6 +153,7 @@ public class Game {
         exitLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                scoreClass.writeScore();
                 exitMessage(); //writes score and displays message
             }
         });
