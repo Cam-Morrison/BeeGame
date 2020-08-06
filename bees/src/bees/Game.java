@@ -109,15 +109,7 @@ public class Game {
                 int keyCode = event.getKeyCode();
                 switch (keyCode) {
                     case 27:  //Escape keyCode
-                        if (isSettingsMenuOpen == false) { //If Settings isn't open
-                            settingsMenu();  //Open menu
-                        } else { //If settings IS open
-                            isSettingsMenuOpen = false; //Close settings menu
-                            mainFrame.remove(settingsFrame);
-                            mainFrame.repaint();
-                            setBees(newNumBees);
-                            pause = false; //unpause the miss click listener
-                        }
+                        controlSettingsMenu();
                         break;
                     case 91: //Windows button keycode
                         System.exit(0);
@@ -174,8 +166,7 @@ public class Game {
         settings.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                pause = true;
-                settingsMenu(); //Calls settings menu when gear icon is clicked
+                controlSettingsMenu();
             }
         });
         mainFrame.add(settings);
@@ -211,8 +202,20 @@ public class Game {
         } catch (InterruptedException ex) {System.out.println(ex);}
     }
     
+    public void controlSettingsMenu(){ //Checks if menu is open
+        if (isSettingsMenuOpen == false) { //If Settings isn't open
+            settingsMenu();  //Open menu
+        } else { //If settings IS open
+            isSettingsMenuOpen = false; //Close settings menu
+            mainFrame.remove(settingsFrame);
+            mainFrame.repaint();
+            setBees(newNumBees);
+            pause = false; //unpause the miss click listener
+        }    
+    }
+    
     public void settingsMenu() { //Settings Menu 
-        if(settingsMenuLock == false){ //If intro animation isn't in progress
+        if(settingsMenuLock == false){ //If intro animation isn't in progress  
             removeBees(); //Removes bees
             isSettingsMenuOpen = true; //Tells the program the menu is already open
 
