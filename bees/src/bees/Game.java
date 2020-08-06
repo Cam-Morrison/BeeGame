@@ -11,6 +11,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Robot;
@@ -55,12 +56,13 @@ public class Game {
     private int width; //JFrame width
     private int height; //JFrame height
     private Random numGenerator; //Random number
-    private String difficulty = "Normal"; //Default difficulty
     private static JButton numBeeBtn, difficultyBtn, resetBtn, closeBtn, closeMenu; //Settings Menu buttons
     private int newNumBees = 20; //Default value of bees to re-spawn
     private final Scores scoreClass = new Scores(); //Global instance of score class
+    private static Clip clip; //Audio file that is played when bee is clicked
     public static JLabel scoreLabel; //Displays score top left
-    private Clip clip; //Audio file that is played when bee is clicked
+    private static int difficulty = 1; //Default difficulty
+    private boolean settingsMenuLock = false; //If true settings menu cannot be called
 
     public static void main(String[] args) {
         Game bees = new Game();
@@ -69,8 +71,10 @@ public class Game {
     
     public void start() { 
         scoreClass.readScore(); //Reads in score
+        settingsMenuLock = true; //Settings menu cannot be called during introAnimation
         mainFrame(); //Creates JFrame
         introAnimation(); //Shows animation for introduction
+        settingsMenuLock = false; //Now settings menu can be called
         bees(); //Spawns and controls bees 
     }
 
@@ -92,7 +96,7 @@ public class Game {
         }
 
         //Score Label
-        scoreLabel = new JLabel("Bees Saved: " + scoreClass.getScore());
+        scoreLabel = new JLabel("Your score: " + scoreClass.getScore());
         scoreLabel.setFont(new Font("Sans Serif", Font.BOLD, 38));
         scoreLabel.setForeground(Color.white);
         scoreLabel.setBounds(35, 9, 400, 55);
@@ -207,120 +211,129 @@ public class Game {
     }
     
     public void settingsMenu() { //Settings Menu 
-       
-        removeBees(); //Removes bees
-        isSettingsMenuOpen = true; //Tells the program the menu is already open
+        if(settingsMenuLock == false){ //If intro animation isn't in progress
+            removeBees(); //Removes bees
+            isSettingsMenuOpen = true; //Tells the program the menu is already open
 
-        settingsFrame = new JPanel(new GridLayout(5, 1)); //Button grid (Change number for more buttons)
+            settingsFrame = new JPanel(new GridLayout(5, 1)); //Button grid (Change number for more buttons)
 
-        //Creating JButtons
-        numBeeBtn = new JButton("Number of Bees"); //button to change the number of bees
-        difficultyBtn = new JButton("Change Difficulty"); //button to change the difficulty
-        resetBtn = new JButton("Reset Score"); //button to reset score
-        closeBtn = new JButton("Exit Game"); //button to exit game
-        closeMenu = new JButton("Continue"); //button to close menu
+            //Creating JButtons
+            numBeeBtn = new JButton("Number of Bees"); //button to change the number of bees
+            difficultyBtn = new JButton("Change Difficulty"); //button to change the difficulty
+            resetBtn = new JButton("Reset High Score"); //button to reset score
+            closeBtn = new JButton("Exit Game"); //button to exit game
+            closeMenu = new JButton("Continue"); //button to close menu
 
-        //Button to change number of Bees
-        numBeeBtn.setSize(400, 100);
-        numBeeBtn.setForeground(Color.WHITE);
-        numBeeBtn.setFont(new Font("Arial", Font.BOLD, 30));
-        numBeeBtn.setBackground(Color.DARK_GRAY);
-        numBeeBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String[] dropDownMenu = {"10", "20", "30"};
-                String option = (String) JOptionPane.showInputDialog(null, "Please enter the number of bees you would like", "Number of Bees", JOptionPane.PLAIN_MESSAGE, null, dropDownMenu, newNumBees);
-                if (option == null) {
-                    System.out.println("failed");
-                    option = "20";
+            //Button to change number of Bees
+            numBeeBtn.setSize(400, 100);
+            numBeeBtn.setForeground(Color.WHITE);
+            numBeeBtn.setFont(new Font("Arial", Font.BOLD, 30));
+            numBeeBtn.setBackground(Color.DARK_GRAY);
+            numBeeBtn.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    try{
+                        String[] dropDownMenu = {"10", "20", "30"};
+                        String option = (String) JOptionPane.showInputDialog(null, "Please enter the number of bees you would like", "Number of Bees", JOptionPane.PLAIN_MESSAGE, null, dropDownMenu, newNumBees);
+                        scoreClass.resetScore();
+                        if(option != null){  
+                            newNumBees = Integer.parseInt(option);                        
+                        } else{
+                            newNumBees = 20;
+                        }
+                    }catch(HeadlessException | NumberFormatException ex){}
                 }
-                newNumBees = Integer.parseInt(option);
-            }
-        });
+            });
 
-        //Button to change the difficulty
-        difficultyBtn.setSize(400, 100);
-        difficultyBtn.setForeground(Color.WHITE);
-        difficultyBtn.setFont(new Font("Arial", Font.BOLD, 30));
-        difficultyBtn.setBackground(Color.DARK_GRAY);
-        difficultyBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String optionsList[] = {"Easy", "Normal", "Hard"};
-                difficulty = (String) JOptionPane.showInputDialog(null, "Please enter the difficulty of bees you would like", "Difficulty", JOptionPane.PLAIN_MESSAGE, null, optionsList, difficulty);
-                if (difficulty == null) { //If there is no input then set to default value
-                    difficulty = "Normal";
+            //Button to change the difficulty
+            difficultyBtn.setSize(400, 100);
+            difficultyBtn.setForeground(Color.WHITE);
+            difficultyBtn.setFont(new Font("Arial", Font.BOLD, 30));
+            difficultyBtn.setBackground(Color.DARK_GRAY);
+            difficultyBtn.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    try{
+                        String optionsList[] = {"Easy", "Normal", "Hard"};
+                        String option = (String) JOptionPane.showInputDialog(null, "Please enter the difficulty of bees you would like", "Difficulty", JOptionPane.PLAIN_MESSAGE, null, optionsList, optionsList[difficulty]);
+                        if(option == null){
+                            option = "Normal";                    
+                        }
+                        switch (option) {
+                            case "Easy":
+                                difficulty = 0;
+                                delay = 7;
+                                break;
+                            case "Normal":
+                                difficulty = 1;
+                                delay = 5;
+                                break;
+                            case "Hard":
+                                difficulty = 2;
+                                delay = 3;
+                                break;       
+                        }                  
+                    }catch(HeadlessException | NumberFormatException ex){}
                 }
-                switch (difficulty) {
-                    case "Easy":
-                        delay = 7;
-                        break;
-                    case "Normal":
-                        delay = 5;
-                        break;
-                    case "Hard":
-                        delay = 3;
-                        break;
+            });
+
+            //Reset score Buttons
+            resetBtn.setSize(400, 100);
+            resetBtn.setForeground(Color.WHITE);
+            resetBtn.setFont(new Font("Arial", Font.BOLD, 30));
+            resetBtn.setBackground(Color.DARK_GRAY);
+            resetBtn.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    scoreClass.resetHighScore();
+                    scoreClass.resetScore();
+                    scoreClass.repaintScore();
                 }
-            }
-        });
+            });
 
-        //Reset score Buttons
-        resetBtn.setSize(400, 100);
-        resetBtn.setForeground(Color.WHITE);
-        resetBtn.setFont(new Font("Arial", Font.BOLD, 30));
-        resetBtn.setBackground(Color.DARK_GRAY);
-        resetBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                scoreClass.resetScore();
-                scoreClass.repaintScore();
-                scoreClass.writeScore();
-            }
-        });
+            //Close game button
+            closeBtn.setSize(400, 100);
+            closeBtn.setForeground(Color.WHITE);
+            closeBtn.setFont(new Font("Arial", Font.BOLD, 30));
+            closeBtn.setBackground(Color.red);
+            closeBtn.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    scoreClass.writeScore();  
+                    exitMessage();
+                }
+            });
 
-        //Close game button
-        closeBtn.setSize(400, 100);
-        closeBtn.setForeground(Color.WHITE);
-        closeBtn.setFont(new Font("Arial", Font.BOLD, 30));
-        closeBtn.setBackground(Color.red);
-        closeBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                scoreClass.writeScore();  
-                exitMessage();
-            }
-        });
+            //Close menu button
+            closeMenu.setSize(400, 100);
+            closeMenu.setForeground(Color.DARK_GRAY);
+            closeMenu.setFont(new Font("Arial", Font.BOLD, 30));
+            closeMenu.setBackground(Color.green);
+            closeMenu.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    mainFrame.remove(settingsFrame);
+                    mainFrame.repaint();
+                    setBees(newNumBees);
+                    pause = false; //unpause the miss click listener
+                    isSettingsMenuOpen = false;
+                }
+            });
 
-        //Close menu button
-        closeMenu.setSize(400, 100);
-        closeMenu.setForeground(Color.DARK_GRAY);
-        closeMenu.setFont(new Font("Arial", Font.BOLD, 30));
-        closeMenu.setBackground(Color.green);
-        closeMenu.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                mainFrame.remove(settingsFrame);
-                mainFrame.repaint();
-                setBees(newNumBees);
-                pause = false; //unpause the miss click listener
-                isSettingsMenuOpen = false;
-            }
-        });
+            //Settings Frame dimensions and customisations 
+            settingsFrame.setSize(400, 500);
+            settingsFrame.setLocation((width - 400) / 2, (height - 500) / 2);
+            settingsFrame.setBackground(Color.GRAY);
 
-        //Settings Frame dimensions and customisations 
-        settingsFrame.setSize(400, 500);
-        settingsFrame.setLocation((width - 400) / 2, (height - 500) / 2);
-        settingsFrame.setBackground(Color.GRAY);
+            settingsFrame.add(numBeeBtn);
+            settingsFrame.add(difficultyBtn);
+            settingsFrame.add(resetBtn);
+            settingsFrame.add(closeBtn);
+            settingsFrame.add(closeMenu);
 
-        settingsFrame.add(numBeeBtn);
-        settingsFrame.add(difficultyBtn);
-        settingsFrame.add(resetBtn);
-        settingsFrame.add(closeBtn);
-        settingsFrame.add(closeMenu);
-
-        settingsFrame.setVisible(true);
-        mainFrame.setFocusable(true);
-        settingsFrame.setFocusable(true);
-        settingsFrame.requestFocus();
-        mainFrame.add(settingsFrame);
-        mainFrame.revalidate();
-        mainFrame.repaint();
+            settingsFrame.setVisible(true);
+            mainFrame.setFocusable(true);
+            settingsFrame.setFocusable(true);
+            settingsFrame.requestFocus();
+            mainFrame.add(settingsFrame);
+            mainFrame.revalidate();
+            mainFrame.repaint();           
+        }
     }
 
     private void bees() { // Main function to run program
@@ -419,6 +432,10 @@ public class Game {
         }
     }
     
+    public int returnDifficulty(){ //Other classes use this to gain the difficulty settings
+        return this.difficulty + 1;
+    }
+    
     public void gameOver() { //Function to display options once a game is complete
         
         pause = true;
@@ -431,6 +448,9 @@ public class Game {
 
             if (menuChoice == 0) { // If the user wants to play another game
                 try { 
+                    scoreClass.writeScore(); //Checks the score for a new record and if true it saves it.
+                    scoreClass.resetScore(); //Reset current games score and repaints label
+                    
                     Robot robot = new Robot(); 
                     robot.keyPress(KeyEvent.VK_ESCAPE); //Program presses escape to call settings menu rather than creating a new menu
                     robot.keyRelease(KeyEvent.VK_ESCAPE);
@@ -450,8 +470,7 @@ public class Game {
    
         pause = true; //Stops score deduction listener
         removeBees(); //Removes Bees from frame
-        scoreClass.writeScore(); //Writes score to file
-        
+
         new java.util.Timer().schedule( //Scheduling system exit for 3 seconds from now.
             new java.util.TimerTask() {
                 @Override
@@ -463,7 +482,7 @@ public class Game {
         );
         
         //Notification popup before shutdown schedule
-        JOptionPane optionPane = new JOptionPane("Thank you for playing, your score is: " + scoreClass.getScore() + "\n Automatic shutdown shortly"
+        JOptionPane optionPane = new JOptionPane("Thank you for playing!\n Automatic shutdown shortly"
         ,JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
         JDialog dialog = new JDialog();
         dialog.setModal(true);
