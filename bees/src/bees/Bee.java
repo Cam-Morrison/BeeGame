@@ -1,11 +1,11 @@
 package bees;
 
 /* ---------------- Details ------------------
-  * Authors: Cameron Morrison & Ged Robertson
-  * Program: The Bee Game
-  * Objective: Save the bees!
-  * Year created: 2020   	
-  * ------------------------------------------*/
+ * Authors: Cameron Morrison & Ged Robertson
+ * Program: The Bee Game
+ * Objective: Save the bees!
+ * Year created: 2020   	
+ * ------------------------------------------*/
 import static bees.Game.setTimeout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -24,36 +24,36 @@ public class Bee {
     private int currentY; //Current Y location
     private int goingX = 0; //New X location
     private int goingY = 0; //New Y location
-    private final Image swatImage; //Image when bee is clicked
-    private final Image beeImage; //Image of bee
-    private final Image beeFlippedImage; //Reversed image of bee
     private int currentIcon = 1; //Icon to display
-    private final int frameWidth; //width of screen
-    private final int frameHeight; //height of screen
-    private final Random numGenerator; //Random (for new location coordinates)
-    private final JFrame mainFrame; //JFrame container of program
-    private final int difficulty; //Difficulty settings
+    private final int FRAME_WIDTH; //width of screen
+    private final int FRAME_HEIGHT; //height of screen
+    private final int DIFFICULTY; //Difficulty settings
+    private final Image CLICKED_IMAGE; //Image when bee is clicked
+    private final Image BEE_IMAGE; //Image of bee
+    private final Image REVERSED_BEE_IMAGE; //Reversed image of bee
+    private final Random RANDOM_LOCATION; //Random (for new location coordinates)
+    private final JFrame MAIN_FRAME; //JFrame container of program 
+    private final ImageIcon ICON; //Image of bee or flower
     private Scores score = new Scores(); //Instance of score class
-    ImageIcon icon; 
   
     public Bee(JFrame mainFrame, Game bees, Random numGenerator, int frameWidth, int frameHeight, Image swatImage, Image beeImage, Image beeFlippedImage, int difficulty) {
 
-        this.numGenerator = numGenerator;
-        this.frameHeight = frameHeight;
-        this.frameWidth = frameWidth;
-        this.mainFrame = mainFrame;
-        this.swatImage = swatImage;
-        this.beeImage = beeImage;
-        this.beeFlippedImage = beeFlippedImage;
-        this.difficulty = difficulty;
+        this.RANDOM_LOCATION = numGenerator;
+        this.FRAME_HEIGHT = frameHeight;
+        this.FRAME_WIDTH = frameWidth;
+        this.MAIN_FRAME = mainFrame;
+        this.CLICKED_IMAGE = swatImage;
+        this.BEE_IMAGE = beeImage;
+        this.REVERSED_BEE_IMAGE = beeFlippedImage;
+        this.DIFFICULTY = difficulty;
 
         currentX = numGenerator.nextInt((frameWidth - 210) + 1);
         currentY = numGenerator.nextInt((frameHeight - 150) + 1);
         goingX = numGenerator.nextInt((frameWidth - 210) + 1);
         goingY = numGenerator.nextInt((frameHeight - 150) + 1);
 
-        icon = new ImageIcon(beeImage);
-        label = new JLabel(icon);   
+        ICON = new ImageIcon(beeImage);
+        label = new JLabel(ICON);   
         label.addMouseListener(new MouseAdapter() { // When Image is clicked
             @Override
             public void mousePressed(MouseEvent e) {
@@ -73,7 +73,7 @@ public class Bee {
         });
         mainFrame.add(label);
         label.setVisible(true);
-        label.setSize(icon.getIconWidth(), icon.getIconHeight());
+        label.setSize(ICON.getIconWidth(), ICON.getIconHeight());
     } //End Function Bee
 
 
@@ -82,13 +82,13 @@ public class Bee {
             currentIcon = iconNumber;
             switch (iconNumber) {
                 case 0:
-                    icon.setImage(swatImage); //When clicked
+                    ICON.setImage(CLICKED_IMAGE); //When clicked
                     break;
                 case 1:
-                    icon.setImage(beeImage); //Original
+                    ICON.setImage(BEE_IMAGE); //Original
                     break;
                 case 2:
-                    icon.setImage(beeFlippedImage); //Reversed
+                    ICON.setImage(REVERSED_BEE_IMAGE); //Reversed
                     break;
             }
             label.repaint();
@@ -97,16 +97,16 @@ public class Bee {
 
     public void kill() { //Kill label when clicked
         dead = true;
-        mainFrame.remove(label);
-        mainFrame.revalidate();
-        mainFrame.repaint();
+        MAIN_FRAME.remove(label);
+        MAIN_FRAME.revalidate();
+        MAIN_FRAME.repaint();
     }
 
     public void tick(Point mouseLocation) { //Function to smoothly move Bees
         if (dead == false) {
             int multiplier = 1;
             if (mouseLocation != null && (Math.abs(mouseLocation.x - (currentX + 75)) <= 100 && Math.abs(mouseLocation.y - (currentY + 75)) <= 100)) {
-                multiplier = difficulty + 1;
+                multiplier = DIFFICULTY + 1;
             }
             if (Math.abs(currentX - goingX) <= multiplier) {
                 currentX = goingX;
@@ -115,8 +115,8 @@ public class Bee {
                 currentY = goingY;
             }
             if (currentY == goingY && currentX == goingX) {
-                goingX = numGenerator.nextInt((frameWidth - 210) + 1);
-                goingY = numGenerator.nextInt((frameHeight - 150) + 1);
+                goingX = RANDOM_LOCATION.nextInt((FRAME_WIDTH - 210) + 1);
+                goingY = RANDOM_LOCATION.nextInt((FRAME_HEIGHT - 150) + 1);
             }
             if (currentX > goingX) {
                 currentX -= 1 * multiplier;

@@ -1,11 +1,11 @@
 package bees;
 
 /* ---------------- Details ------------------
-  * Authors: Cameron Morrison & Ged Robertson
-  * Program: The Bee Game
-  * Objective: Save the bees!
-  * Year created: 2020   	
-  * ------------------------------------------*/
+ * Authors: Cameron Morrison & Ged Robertson
+ * Program: The Bee Game
+ * Objective: Save the bees!
+ * Year created: 2020   	
+ * ------------------------------------------*/
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;

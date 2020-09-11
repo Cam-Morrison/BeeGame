@@ -1,11 +1,11 @@
 package bees;
 
 /* ---------------- Details ------------------
-  * Authors: Cameron Morrison & Ged Robertson
-  * Program: The Bee Game
-  * Objective: Save the bees!
-  * Year created: 2020   						
-  * ------------------------------------------*/
+ * Authors: Cameron Morrison & Ged Robertson
+ * Program: The Bee Game
+ * Objective: Save the bees!
+ * Year created: 2020   						
+ * ------------------------------------------*/
 import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -39,38 +39,37 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class Game {
-    
+
     private static JFrame mainFrame; //Game background
     private static JPanel settingsFrame; //Settings GUI
     private static JLabel settings; //Displays settings when clicked
     private static JLabel exitLabel; //button to exit program
+    private static Clip clip; //Audio file that is played when bee is clicked
+    private static int difficulty = 1; //Default difficulty
+    private static JButton numBeeBtn, difficultyBtn, resetBtn, closeBtn, closeMenu; //Settings Menu buttons
+    public static JLabel scoreLabel; //Displays score top left
     private Image swatImage; //Image when bees are clicked
     private Image beeImage; //Bee image
     private Image beeFlippedImage;//Reverse bee image when bee is moving backwards
     private int numBees = 0; //Change number of bees per game
     private int delay = 5; //Speed of bee movement
-    private final boolean gameRunning = true; //Keeps game moving
-    private boolean pause; //Whilst pause is true, you can not loose score for clicking
-    private boolean isSettingsMenuOpen = false; //When pressing escape twice it causes glitch, adding fail safe
-    private Bee[] bees; //Stores the Bees
     private int width; //JFrame width
     private int height; //JFrame height
-    private Random numGenerator; //Random number
-    private static JButton numBeeBtn, difficultyBtn, resetBtn, closeBtn, closeMenu; //Settings Menu buttons
     private int newNumBees = 20; //Default value of bees to re-spawn
-    private final Scores scoreClass = new Scores(); //Global instance of score class
-    private static Clip clip; //Audio file that is played when bee is clicked
-    public static JLabel scoreLabel; //Displays score top left
-    private static int difficulty = 1; //Default difficulty
+    private boolean pause; //Whilst pause is true, you can not loose score for clicking
+    private boolean isSettingsMenuOpen = false; //When pressing escape twice it causes glitch, adding fail safe
     private boolean settingsMenuLock = false; //If true settings menu cannot be called
+    private final Scores SCORE_CLASS = new Scores(); //Global instance of score class
+    private Bee[] bees; //Stores the Bees
+    private Random numGenerator; //Random number  
 
     public static void main(String[] args) {
         Game bees = new Game();
         bees.start();
-    } //End of main
+    } 
     
     public void start() { 
-        scoreClass.readScore(); //Reads in score
+        SCORE_CLASS.readScore(); //Reads in score
         settingsMenuLock = true; //Settings menu cannot be called during introAnimation
         mainFrame(); //Creates JFrame
         introAnimation(); //Shows animation for introduction
@@ -96,7 +95,7 @@ public class Game {
         }
 
         //Score Label
-        scoreLabel = new JLabel("Your score: " + scoreClass.getScore());
+        scoreLabel = new JLabel("Your score: " + SCORE_CLASS.getScore());
         scoreLabel.setFont(new Font("Sans Serif", Font.BOLD, 38));
         scoreLabel.setForeground(Color.white);
         scoreLabel.setBounds(35, 9, 400, 55);
@@ -145,7 +144,7 @@ public class Game {
         exitLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                scoreClass.writeScore();
+                SCORE_CLASS.writeScore();
                 exitMessage(); //writes score and displays message
             }
         });
@@ -179,7 +178,7 @@ public class Game {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (pause == false) {
-                    scoreClass.deductScore();
+                    SCORE_CLASS.deductScore();
                 }
             } 
         });
@@ -238,7 +237,7 @@ public class Game {
                     try{
                         String[] dropDownMenu = {"10", "20", "30"};
                         String option = (String) JOptionPane.showInputDialog(null, "Please enter the number of bees you would like", "Number of Bees", JOptionPane.PLAIN_MESSAGE, null, dropDownMenu, newNumBees);
-                        scoreClass.resetScore();
+                        SCORE_CLASS.resetScore();
                         if(option != null){  
                             newNumBees = Integer.parseInt(option);                        
                         } else{
@@ -286,9 +285,9 @@ public class Game {
             resetBtn.setBackground(Color.DARK_GRAY);
             resetBtn.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    scoreClass.resetHighScore();
-                    scoreClass.resetScore();
-                    scoreClass.repaintScore();
+                    SCORE_CLASS.resetHighScore();
+                    SCORE_CLASS.resetScore();
+                    SCORE_CLASS.repaintScore();
                 }
             });
 
@@ -299,7 +298,7 @@ public class Game {
             closeBtn.setBackground(Color.red);
             closeBtn.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    scoreClass.writeScore();  
+                    SCORE_CLASS.writeScore();  
                     exitMessage();
                 }
             });
@@ -388,7 +387,7 @@ public class Game {
         }
 
         numBees = -1;
-        scoreClass.resetClicked();
+        SCORE_CLASS.resetClicked();
 
         Bee[] newBees = new Bee[amount];
         for (int i = 0; i < amount; i++) { // For number of Bees
@@ -397,7 +396,7 @@ public class Game {
 
         bees = newBees;
         numBees = amount;
-        scoreClass.beeCount(numBees);
+        SCORE_CLASS.beeCount(numBees);
         mainFrame.repaint();
     }
 
@@ -413,13 +412,11 @@ public class Game {
         long timeNow;
 
         while (true) {
-            if (gameRunning) {
-                //timeNow = System.nanoTime();
-                timeNow = System.currentTimeMillis();
-                if (timeNow > (lastTime + (delay / 2))) { //Speed of bee movement (difficulty)
-                    tick(); //Add more to change speed  
-                    lastTime = timeNow;
-                }
+            //timeNow = System.nanoTime();
+            timeNow = System.currentTimeMillis();
+            if (timeNow > (lastTime + (delay / 2))) { //Speed of bee movement (difficulty)
+                tick(); //Add more to change speed  
+                lastTime = timeNow;      
             }
         }
     }
@@ -452,8 +449,8 @@ public class Game {
 
             if (menuChoice == 0) { // If the user wants to play another game
                 try { 
-                    scoreClass.writeScore(); //Checks the score for a new record and if true it saves it.
-                    scoreClass.resetScore(); //Reset current games score and repaints label
+                    SCORE_CLASS.writeScore(); //Checks the score for a new record and if true it saves it.
+                    SCORE_CLASS.resetScore(); //Reset current games score and repaints label
                     
                     Robot robot = new Robot(); 
                     robot.keyPress(KeyEvent.VK_ESCAPE); //Program presses escape to call settings menu rather than creating a new menu
@@ -465,10 +462,7 @@ public class Game {
                 exitMessage();  
             }     
         }
-        
-
     } //End of function
-
     
     public void exitMessage() { pause = true; //Pauses score deduction listener
    
@@ -483,8 +477,7 @@ public class Game {
                 }
             }, 
             3000 //3 second delay before shutdown 
-        );
-        
+        );      
         //Notification popup before shutdown schedule
         JOptionPane optionPane = new JOptionPane("Thank you for playing!\n Automatic shutdown shortly"
         ,JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
@@ -507,5 +500,4 @@ public class Game {
             }
         }).start();
     } //End of function 
-
 } // End of Game Class
